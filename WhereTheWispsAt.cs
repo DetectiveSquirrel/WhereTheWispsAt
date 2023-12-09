@@ -67,7 +67,7 @@ namespace WhereTheWispsAt
 
         public override void EntityRemoved(Entity entity)
         {
-            foreach (var list in new[] { Wisps.Blue, Wisps.Purple, Wisps.Yellow, Wisps.LightBomb })
+            foreach (var list in new[] { Wisps.Blue, Wisps.Purple, Wisps.Yellow, Wisps.LightBomb, Wisps.Wells, Wisps.FuelRefill })
             {
                 RemoveEntityFromList(entity, list);
             }
