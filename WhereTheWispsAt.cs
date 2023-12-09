@@ -67,7 +67,8 @@ public class WhereTheWispsAt : BaseSettingsPlugin<WhereTheWispsAtSettings>
     {
         string path = entity.TryGetComponent<Animated>(out var animatedComp) ? animatedComp?.BaseAnimatedObjectEntity?.Path : null;
 
-        switch (entity.Metadata)
+        var metadata = entity.Metadata;
+        switch (metadata)
         {
             case "Metadata/MiscellaneousObjects/Azmeri/AzmeriResourceBase":
                 if (path != null)
@@ -99,19 +100,39 @@ public class WhereTheWispsAt : BaseSettingsPlugin<WhereTheWispsAtSettings>
                 Wisps.Encounters[entity] = "Buff";
                 break;
 
-            case var metadata when metadata.Contains("Azmeri/SacrificeAltarObjects"):
+            case "Metadata/Monsters/LeagueAzmeri/VoodooKingBoss/VoodooKingBoss":
+            case "Metadata/Monsters/LeagueAzmeri/VoodooKingBoss/VoodooKingBoss2":
+            case "Metadata/Monsters/LeagueAzmeri/VoodooKingBoss/VoodooKingBoss3":
+            case "Metadata/NPC/Ghostrider":
+            case "Metadata/NPC/League/Affliction/GlyphsEtching01":
+            case "Metadata/NPC/League/Affliction/GlyphsEtching02":
+            case "Metadata/NPC/League/Affliction/GlyphsEtching03":
+            case "Metadata/NPC/League/Affliction/GlyphsEtching04":
+            case "Metadata/NPC/League/Affliction/GlyphsEtching05":
+            case "Metadata/NPC/League/Affliction/GlyphsGoddessStatue":
+            case "Metadata/NPC/League/Affliction/GlyphsGruthkulShrine":
+            case "Metadata/NPC/League/Affliction/GlyphsKingGlyphOne":
+            case "Metadata/NPC/League/Affliction/GlyphsKingGlyphTwo":
+            case "Metadata/NPC/League/Affliction/GlyphsMajiProclamation01":
+            case "Metadata/NPC/League/Affliction/GlyphsMajiProclamation02":
+            case "Metadata/NPC/League/Affliction/GlyphsSingleStatue":
+            case "Metadata/NPC/League/Affliction/GlyphsWarringSisters":
+                Wisps.Encounters[entity] = metadata[(metadata.LastIndexOf('/') + 1)..];
+                break;
+
+            case not null when metadata.Contains("Azmeri/SacrificeAltarObjects"):
                 Wisps.Altars.Add(entity);
                 break;
 
-            case var metadata when metadata.Contains("Azmeri/AzmeriDustConverter"):
+            case not null when metadata.Contains("Azmeri/AzmeriDustConverter"):
                 Wisps.DustConverters.Add(entity);
                 break;
 
-            case var metadata when metadata.Contains("Azmeri/UniqueDealer"):
+            case not null when metadata.Contains("Azmeri/UniqueDealer"):
                 Wisps.Dealer.Add(entity);
                 break;
 
-            case var metadata when metadata.StartsWith("Metadata/Chests/LeagueAzmeri/"):
+            case not null when metadata.StartsWith("Metadata/Chests/LeagueAzmeri/"):
                 Wisps.Chests.Add(entity);
                 break;
         }
