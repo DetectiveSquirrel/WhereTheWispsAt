@@ -20,9 +20,10 @@ public class WhereTheWispsAt : BaseSettingsPlugin<WhereTheWispsAtSettings>
         List<Entity> Altars,
         List<Entity> DustConverters,
         List<Entity> Dealer,
-        List<Entity> Chests);
+        List<Entity> Chests,
+        Dictionary<Entity, string> Encounters);
 
-    public WispData Wisps = new([], [], [], [], [], [], [], [], [], []);
+    public WispData Wisps = new([], [], [], [], [], [], [], [], [], [], []);
 
     public override bool Initialise() => true;
 
@@ -90,6 +91,14 @@ public class WhereTheWispsAt : BaseSettingsPlugin<WhereTheWispsAtSettings>
                 Wisps.Wells.Add(entity);
                 break;
 
+            case "Metadata/NPC/League/Affliction/GlyphsHarvestTree":
+                Wisps.Encounters[entity] = "Harvest";
+                break;
+
+            case "Metadata/MiscellaneousObjects/Azmeri/AzmeriBuffEffigySmall":
+                Wisps.Encounters[entity] = "Buff";
+                break;
+
             case var metadata when metadata.Contains("Azmeri/SacrificeAltarObjects"):
                 Wisps.Altars.Add(entity);
                 break;
@@ -113,6 +122,7 @@ public class WhereTheWispsAt : BaseSettingsPlugin<WhereTheWispsAtSettings>
         new[] { Wisps.Blue, Wisps.Purple, Wisps.Yellow, Wisps.LightBomb, Wisps.Wells, Wisps.FuelRefill }
             .ToList()
             .ForEach(list => RemoveEntityFromList(entity, list));
+        Wisps.Encounters.Remove(entity);
     }
 
     private static void RemoveEntityFromList(Entity entity, List<Entity> list)
@@ -121,7 +131,7 @@ public class WhereTheWispsAt : BaseSettingsPlugin<WhereTheWispsAtSettings>
         if (entityToRemove != null) list.Remove(entityToRemove);
     }
 
-    public override void AreaChange(AreaInstance area) => Wisps = new([], [], [], [], [], [], [], [], [], []);
+    public override void AreaChange(AreaInstance area) => Wisps = new([], [], [], [], [], [], [], [], [], [], []);
 
     public override void Render()
     {
@@ -153,6 +163,11 @@ public class WhereTheWispsAt : BaseSettingsPlugin<WhereTheWispsAtSettings>
                  })
         {
             DrawWisps(list, color, size, text);
+        }
+
+        foreach (var (entity, text) in Wisps.Encounters)
+        {
+            DrawWisps([entity], Settings.EncounterColor, 0, text);
         }
 
         foreach (var chest in Wisps.Chests)
