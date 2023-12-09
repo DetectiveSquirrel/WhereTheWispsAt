@@ -9,8 +9,8 @@ namespace WhereTheWispsAt
 {
     public class WhereTheWispsAt : BaseSettingsPlugin<WhereTheWispsAtSettings>
     {
-        public record WispData(List<Entity> Purple, List<Entity> Yellow, List<Entity> Blue, List<Entity> LightBomb, List<Entity> Wells, List<Entity> FuelRefill);
-        public WispData Wisps = new([], [], [], [], [], []);
+        public record WispData(List<Entity> Purple, List<Entity> Yellow, List<Entity> Blue, List<Entity> LightBomb, List<Entity> Wells, List<Entity> FuelRefill, List<Entity> Altars);
+        public WispData Wisps = new([], [], [], [], [], [], []);
 
         public override bool Initialise() => true;
 
@@ -21,24 +21,30 @@ namespace WhereTheWispsAt
 
         public override Job Tick()
         {
-            if (Wisps.Wells.Count > 0)
-            {
-                var wellsToRemove = Wisps.Wells
-                    .Where(well => well.TryGetComponent<StateMachine>(out var stateComp)
-                                   && stateComp?.States.Any(x => x.Name == "activated" && x.Value == 1) == true)
-                    .ToList();
+            var wellsToRemove = Wisps.Wells
+                .Where(well => well.TryGetComponent<StateMachine>(out var stateComp)
+                               && stateComp?.States.Any(x => x.Name == "activated" && x.Value == 1) == true)
+                .ToList();
 
-                wellsToRemove.ForEach(well => RemoveEntityFromList(well, Wisps.Wells));
-            }
+            wellsToRemove.ForEach(well => RemoveEntityFromList(well, Wisps.Wells));
+
+            var altarsToRemove = Wisps.Altars
+                .Where(altar => altar.TryGetComponent<StateMachine>(out var stateComp)
+                               && stateComp?.States.Any(x => x.Name == "activated" && x.Value == 1) == true)
+                .ToList();
+
+            altarsToRemove.ForEach(altar => RemoveEntityFromList(altar, Wisps.Altars));
+
             return null;
         }
 
         public override void EntityAdded(Entity entity)
         {
+            string path = entity.TryGetComponent<Animated>(out var animatedComp) ? animatedComp?.BaseAnimatedObjectEntity?.Path : null;
+
             switch (entity.Metadata)
             {
                 case "Metadata/MiscellaneousObjects/Azmeri/AzmeriResourceBase":
-                    var path = entity.TryGetComponent<Animated>(out var animatedComp) ? animatedComp?.BaseAnimatedObjectEntity?.Path : null;
                     if (path != null)
                     {
                         if (path.Contains("League_Azmeri/resources/wisp_doodads/wisp_primal")) Wisps.Blue.Add(entity);
@@ -58,6 +64,10 @@ namespace WhereTheWispsAt
                 case "Metadata/MiscellaneousObjects/Azmeri/AzmeriFlaskRefill":
                     Wisps.Wells.Add(entity);
                     break;
+
+                case var metadata when metadata.Contains("Azmeri/SacrificeAltarObjects"):
+                    Wisps.Altars.Add(entity);
+                    break;
             }
         }
 
@@ -74,7 +84,7 @@ namespace WhereTheWispsAt
             if (entityToRemove != null) list.Remove(entityToRemove);
         }
 
-        public override void AreaChange(AreaInstance area) => Wisps = new([], [], [], [], [], []);
+        public override void AreaChange(AreaInstance area) => Wisps = new([], [], [], [], [], [], []);
 
         public override void Render()
         {
@@ -87,7 +97,8 @@ namespace WhereTheWispsAt
                 (Wisps.Blue, Settings.BlueWisp, Settings.BlueSize.Value),
                 (Wisps.LightBomb, Settings.LightBomb, Settings.LightBombSize.Value),
                 (Wisps.Wells, Settings.Wells, Settings.WellsSize.Value),
-                (Wisps.FuelRefill, Settings.FuelRefill, Settings.FuelRefillSize.Value)
+                (Wisps.FuelRefill, Settings.FuelRefill, Settings.FuelRefillSize.Value),
+                (Wisps.Altars, Settings.Altars, Settings.AltarSize.Value)
             })
             {
                 DrawWisps(list, color, size);
