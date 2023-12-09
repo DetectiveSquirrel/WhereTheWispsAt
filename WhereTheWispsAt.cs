@@ -1,9 +1,12 @@
 ﻿using ExileCore;
 using ExileCore.PoEMemory.Components;
 using ExileCore.PoEMemory.MemoryObjects;
+using ExileCore.Shared.Helpers;
+using ImGuiNET;
 using SharpDX;
 using System.Collections.Generic;
 using System.Linq;
+using Vector2N = System.Numerics.Vector2;
 
 namespace WhereTheWispsAt
 {
@@ -101,29 +104,55 @@ namespace WhereTheWispsAt
         {
             if (!Settings.Enable.Value || !GameController.InGame) return;
 
-            foreach (var (list, color, size) in new[]
+            var ingameUi = GameController.Game.IngameState.IngameUi;
+            if (!Settings.IgnoreFullscreenPanels && ingameUi.FullscreenPanels.Any(x => x.IsVisible))
             {
-                (Wisps.Yellow, Settings.YellowWisp, Settings.YellowSize.Value),
-                (Wisps.Purple, Settings.PurpleWisp, Settings.PurpleSize.Value),
-                (Wisps.Blue, Settings.BlueWisp, Settings.BlueSize.Value),
-                (Wisps.LightBomb, Settings.LightBomb, Settings.LightBombSize.Value),
-                (Wisps.Wells, Settings.Wells, Settings.WellsSize.Value),
-                (Wisps.FuelRefill, Settings.FuelRefill, Settings.FuelRefillSize.Value),
-                (Wisps.Altars, Settings.Altars, Settings.AltarSize.Value),
-                (Wisps.DustConverters, Settings.DustConverters, Settings.DustConverterSize.Value)
-            })
-            {
-                DrawWisps(list, color, size);
+                return;
             }
 
-            void DrawWisps(List<Entity> entityList, Color color, int size)
+            if (!Settings.IgnoreLargePanels && ingameUi.LargePanels.Any(x => x.IsVisible))
+            {
+                return;
+            }
+
+            foreach (var (list, color, size, text) in new[]
+            {
+                (Wisps.Yellow, Settings.YellowWisp, Settings.YellowSize.Value, null),
+                (Wisps.Purple, Settings.PurpleWisp, Settings.PurpleSize.Value, null),
+                (Wisps.Blue, Settings.BlueWisp, Settings.BlueSize.Value, null),
+                (Wisps.LightBomb, Settings.LightBomb, 0, "Light Bomb"),
+                (Wisps.Wells, Settings.Wells, 0, "Well"),
+                (Wisps.FuelRefill, Settings.FuelRefill, 0, "Fuel Refill"),
+                (Wisps.Altars, Settings.Altars, 0, "Altar"),
+                (Wisps.DustConverters, Settings.DustConverters, 0, "Dust Converter")
+            })
+            {
+                DrawWisps(list, color, size, text);
+            }
+
+            void DrawWisps(List<Entity> entityList, Color color, int size, string text)
             {
                 if (Settings.DrawMap && GameController.IngameState.IngameUi.Map.LargeMap.IsVisibleLocal)
                 {
                     foreach (var entity in entityList)
                     {
                         var mapPos = GameController.IngameState.Data.GetGridMapScreenPosition(entity.GridPosNum);
-                        Graphics.DrawBox(new RectangleF(mapPos.X - size / 2, mapPos.Y - size / 2, size, size), color, 1f);
+
+                        if (text != null)
+                        {
+                            var widthPadding = 3;
+                            var boxOffset = Graphics.MeasureText(text) / 2f;
+                            var textOffset = boxOffset;
+
+                            boxOffset.X += widthPadding;
+
+                            Graphics.DrawBox(mapPos - boxOffset, mapPos + boxOffset, Color.Black);
+                            Graphics.DrawText(text, mapPos - textOffset, color);
+                        }
+                        else
+                        {
+                            Graphics.DrawBox(new RectangleF(mapPos.X - size / 2, mapPos.Y - size / 2, size, size), color, 1f);
+                        }
                     }
                 }
             }
