@@ -4,7 +4,6 @@ using ExileCore.PoEMemory.MemoryObjects;
 using SharpDX;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Principal;
 
 namespace WhereTheWispsAt
 {
@@ -22,55 +21,51 @@ namespace WhereTheWispsAt
 
         public override Job Tick()
         {
-            if (Wisps.Wells.Count > 0) {
+            if (Wisps.Wells.Count > 0)
+            {
+                var wellsToRemove = Wisps.Wells
+                    .Where(well => well.TryGetComponent<StateMachine>(out var stateComp)
+                                   && stateComp?.States.Any(x => x.Name == "activated" && x.Value == 1) == true)
+                    .ToList();
 
-                foreach (var well in Wisps.Wells)
-                {
-                    well.TryGetComponent<StateMachine>(out var stateComp);
-                    if (stateComp != null && stateComp.States.Any(x => x.Name == "activated" && x.Value == 1))
-                    {
-                        Wisps.Wells.Remove(well);
-                    }
-                }
+                wellsToRemove.ForEach(well => RemoveEntityFromList(well, Wisps.Wells));
             }
             return null;
         }
 
         public override void EntityAdded(Entity entity)
         {
-            if (entity.Metadata == "Metadata/MiscellaneousObjects/Azmeri/AzmeriResourceBase")
+            switch (entity.Metadata)
             {
-                entity.TryGetComponent<Animated>(out var animatedComp);
-                var baseAnimatedObj = animatedComp?.BaseAnimatedObjectEntity;
-                var path = baseAnimatedObj?.Path;
+                case "Metadata/MiscellaneousObjects/Azmeri/AzmeriResourceBase":
+                    var path = entity.TryGetComponent<Animated>(out var animatedComp) ? animatedComp?.BaseAnimatedObjectEntity?.Path : null;
+                    if (path != null)
+                    {
+                        if (path.Contains("League_Azmeri/resources/wisp_doodads/wisp_primal")) Wisps.Blue.Add(entity);
+                        else if (path.Contains("League_Azmeri/resources/wisp_doodads/wisp_warden")) Wisps.Yellow.Add(entity);
+                        else if (path.Contains("League_Azmeri/resources/wisp_doodads/wisp_vodoo")) Wisps.Purple.Add(entity);
+                    }
+                    break;
 
-                if (path != null)
-                {
-                    if (path.Contains("League_Azmeri/resources/wisp_doodads/wisp_primal")) Wisps.Blue.Add(entity);
-                    else if (path.Contains("League_Azmeri/resources/wisp_doodads/wisp_warden")) Wisps.Yellow.Add(entity);
-                    else if (path.Contains("League_Azmeri/resources/wisp_doodads/wisp_vodoo")) Wisps.Purple.Add(entity);
-                }
-            }
-            else if (entity.Metadata == "Metadata/MiscellaneousObjects/Azmeri/AzmeriLightBomb")
-            {
-                Wisps.LightBomb.Add(entity);
-            }
-            else if (entity.Metadata == "Metadata/MiscellaneousObjects/Azmeri/AzmeriFuelResupply")
-            {
-                Wisps.FuelRefill.Add(entity);
-            }
-            else if (entity.Metadata == "Metadata/MiscellaneousObjects/Azmeri/AzmeriFlaskRefill")
-            {
-                Wisps.Wells.Add(entity);
+                case "Metadata/MiscellaneousObjects/Azmeri/AzmeriLightBomb":
+                    Wisps.LightBomb.Add(entity);
+                    break;
+
+                case "Metadata/MiscellaneousObjects/Azmeri/AzmeriFuelResupply":
+                    Wisps.FuelRefill.Add(entity);
+                    break;
+
+                case "Metadata/MiscellaneousObjects/Azmeri/AzmeriFlaskRefill":
+                    Wisps.Wells.Add(entity);
+                    break;
             }
         }
 
         public override void EntityRemoved(Entity entity)
         {
-            foreach (var list in new[] { Wisps.Blue, Wisps.Purple, Wisps.Yellow, Wisps.LightBomb, Wisps.Wells, Wisps.FuelRefill })
-            {
-                RemoveEntityFromList(entity, list);
-            }
+            new[] { Wisps.Blue, Wisps.Purple, Wisps.Yellow, Wisps.LightBomb, Wisps.Wells, Wisps.FuelRefill }
+                .ToList()
+                .ForEach(list => RemoveEntityFromList(entity, list));
         }
 
         private static void RemoveEntityFromList(Entity entity, List<Entity> list)
