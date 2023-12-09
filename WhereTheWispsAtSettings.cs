@@ -19,6 +19,7 @@ namespace WhereTheWispsAt
         public ColorNode FuelRefill { get; set; } = new ColorNode(Color.Green);
         public ColorNode Altars { get; set; } = new ColorNode(Color.Red);
         public ColorNode DustConverters { get; set; } = new ColorNode(Color.HotPink);
+        public ColorNode TemporaryLookings { get; set; } = new ColorNode(Color.HotPink);
         public ToggleNode IgnoreFullscreenPanels { get; set; } = new ToggleNode(false);
         public ToggleNode IgnoreLargePanels { get; set; } = new ToggleNode(false);
     }

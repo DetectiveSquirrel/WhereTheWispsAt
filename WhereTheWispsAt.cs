@@ -12,8 +12,8 @@ namespace WhereTheWispsAt
 {
     public class WhereTheWispsAt : BaseSettingsPlugin<WhereTheWispsAtSettings>
     {
-        public record WispData(List<Entity> Purple, List<Entity> Yellow, List<Entity> Blue, List<Entity> LightBomb, List<Entity> Wells, List<Entity> FuelRefill, List<Entity> Altars, List<Entity> DustConverters);
-        public WispData Wisps = new([], [], [], [], [], [], [], []);
+        public record WispData(List<Entity> Purple, List<Entity> Yellow, List<Entity> Blue, List<Entity> LightBomb, List<Entity> Wells, List<Entity> FuelRefill, List<Entity> Altars, List<Entity> DustConverters, List<Entity> Temporary);
+        public WispData Wisps = new([], [], [], [], [], [], [], [], []);
 
         public override bool Initialise() => true;
 
@@ -82,6 +82,14 @@ namespace WhereTheWispsAt
                 case var metadata when metadata.Contains("Azmeri/AzmeriDustConverter"):
                     Wisps.DustConverters.Add(entity);
                     break;
+
+                case var metadata when metadata.Contains("Eramir"):
+                    Wisps.Temporary.Add(entity);
+                    break;
+            }
+            if (entity.RenderName != null && entity.RenderName.Contains("nameless seer", System.StringComparison.OrdinalIgnoreCase))
+            {
+                Wisps.Temporary.Add(entity);
             }
         }
 
@@ -98,7 +106,7 @@ namespace WhereTheWispsAt
             if (entityToRemove != null) list.Remove(entityToRemove);
         }
 
-        public override void AreaChange(AreaInstance area) => Wisps = new([], [], [], [], [], [], [], []);
+        public override void AreaChange(AreaInstance area) => Wisps = new([], [], [], [], [], [], [], [], []);
 
         public override void Render()
         {
@@ -124,7 +132,8 @@ namespace WhereTheWispsAt
                 (Wisps.Wells, Settings.Wells, 0, "Well"),
                 (Wisps.FuelRefill, Settings.FuelRefill, 0, "Fuel Refill"),
                 (Wisps.Altars, Settings.Altars, 0, "Altar"),
-                (Wisps.DustConverters, Settings.DustConverters, 0, "Dust Converter")
+                (Wisps.DustConverters, Settings.DustConverters, 0, "Dust Converter"),
+                (Wisps.Temporary, Settings.TemporaryLookings, 0, "! TRADER !")
             })
             {
                 DrawWisps(list, color, size, text);
