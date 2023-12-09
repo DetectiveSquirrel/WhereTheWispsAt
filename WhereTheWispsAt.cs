@@ -4,19 +4,36 @@ using ExileCore.PoEMemory.MemoryObjects;
 using SharpDX;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Principal;
 
 namespace WhereTheWispsAt
 {
     public class WhereTheWispsAt : BaseSettingsPlugin<WhereTheWispsAtSettings>
     {
-        public record WispData(List<Entity> Purple, List<Entity> Yellow, List<Entity> Blue, List<Entity> LightBomb);
-        public WispData Wisps = new([], [], [], []);
+        public record WispData(List<Entity> Purple, List<Entity> Yellow, List<Entity> Blue, List<Entity> LightBomb, List<Entity> Wells, List<Entity> FuelRefill);
+        public WispData Wisps = new([], [], [], [], [], []);
 
         public override bool Initialise() => true;
 
         public WhereTheWispsAt()
         {
             Name = "Where The Wisps At";
+        }
+
+        public override Job Tick()
+        {
+            if (Wisps.Wells.Count > 0) {
+
+                foreach (var well in Wisps.Wells)
+                {
+                    well.TryGetComponent<StateMachine>(out var stateComp);
+                    if (stateComp != null && stateComp.States.Any(x => x.Name == "activated" && x.Value == 1))
+                    {
+                        Wisps.Wells.Remove(well);
+                    }
+                }
+            }
+            return null;
         }
 
         public override void EntityAdded(Entity entity)
@@ -38,6 +55,14 @@ namespace WhereTheWispsAt
             {
                 Wisps.LightBomb.Add(entity);
             }
+            else if (entity.Metadata == "Metadata/MiscellaneousObjects/Azmeri/AzmeriFuelResupply")
+            {
+                Wisps.FuelRefill.Add(entity);
+            }
+            else if (entity.Metadata == "Metadata/MiscellaneousObjects/Azmeri/AzmeriFlaskRefill")
+            {
+                Wisps.Wells.Add(entity);
+            }
         }
 
         public override void EntityRemoved(Entity entity)
@@ -54,7 +79,7 @@ namespace WhereTheWispsAt
             if (entityToRemove != null) list.Remove(entityToRemove);
         }
 
-        public override void AreaChange(AreaInstance area) => Wisps = new([], [], [], []);
+        public override void AreaChange(AreaInstance area) => Wisps = new([], [], [], [], [], []);
 
         public override void Render()
         {
@@ -65,7 +90,9 @@ namespace WhereTheWispsAt
                 (Wisps.Yellow, Settings.YellowWisp, Settings.YellowSize.Value),
                 (Wisps.Purple, Settings.PurpleWisp, Settings.PurpleSize.Value),
                 (Wisps.Blue, Settings.BlueWisp, Settings.BlueSize.Value),
-                (Wisps.LightBomb, Settings.LightBomb, Settings.LightBombSize.Value)
+                (Wisps.LightBomb, Settings.LightBomb, Settings.LightBombSize.Value),
+                (Wisps.Wells, Settings.Wells, Settings.WellsSize.Value),
+                (Wisps.FuelRefill, Settings.FuelRefill, Settings.FuelRefillSize.Value)
             })
             {
                 DrawWisps(list, color, size);
