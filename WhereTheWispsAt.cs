@@ -9,8 +9,8 @@ namespace WhereTheWispsAt
 {
     public class WhereTheWispsAt : BaseSettingsPlugin<WhereTheWispsAtSettings>
     {
-        public record WispData(List<Entity> Purple, List<Entity> Yellow, List<Entity> Blue, List<Entity> LightBomb, List<Entity> Wells, List<Entity> FuelRefill, List<Entity> Altars);
-        public WispData Wisps = new([], [], [], [], [], [], []);
+        public record WispData(List<Entity> Purple, List<Entity> Yellow, List<Entity> Blue, List<Entity> LightBomb, List<Entity> Wells, List<Entity> FuelRefill, List<Entity> Altars, List<Entity> DustConverters);
+        public WispData Wisps = new([], [], [], [], [], [], [], []);
 
         public override bool Initialise() => true;
 
@@ -34,6 +34,13 @@ namespace WhereTheWispsAt
                 .ToList();
 
             altarsToRemove.ForEach(altar => RemoveEntityFromList(altar, Wisps.Altars));
+
+            var dustConvertersToRemove = Wisps.DustConverters
+                .Where(converter => converter.TryGetComponent<StateMachine>(out var stateComp)
+                               && stateComp?.States.Any(x => x.Name == "activated" && x.Value == 1) == true)
+                .ToList();
+
+            dustConvertersToRemove.ForEach(altar => RemoveEntityFromList(altar, Wisps.DustConverters));
 
             return null;
         }
@@ -68,6 +75,10 @@ namespace WhereTheWispsAt
                 case var metadata when metadata.Contains("Azmeri/SacrificeAltarObjects"):
                     Wisps.Altars.Add(entity);
                     break;
+
+                case var metadata when metadata.Contains("Azmeri/AzmeriDustConverter"):
+                    Wisps.DustConverters.Add(entity);
+                    break;
             }
         }
 
@@ -84,7 +95,7 @@ namespace WhereTheWispsAt
             if (entityToRemove != null) list.Remove(entityToRemove);
         }
 
-        public override void AreaChange(AreaInstance area) => Wisps = new([], [], [], [], [], [], []);
+        public override void AreaChange(AreaInstance area) => Wisps = new([], [], [], [], [], [], [], []);
 
         public override void Render()
         {
@@ -98,7 +109,8 @@ namespace WhereTheWispsAt
                 (Wisps.LightBomb, Settings.LightBomb, Settings.LightBombSize.Value),
                 (Wisps.Wells, Settings.Wells, Settings.WellsSize.Value),
                 (Wisps.FuelRefill, Settings.FuelRefill, Settings.FuelRefillSize.Value),
-                (Wisps.Altars, Settings.Altars, Settings.AltarSize.Value)
+                (Wisps.Altars, Settings.Altars, Settings.AltarSize.Value),
+                (Wisps.DustConverters, Settings.DustConverters, Settings.DustConverterSize.Value)
             })
             {
                 DrawWisps(list, color, size);
@@ -111,7 +123,7 @@ namespace WhereTheWispsAt
                     foreach (var entity in entityList)
                     {
                         var mapPos = GameController.IngameState.Data.GetGridMapScreenPosition(entity.GridPosNum);
-                        Graphics.DrawBox(new RectangleF(mapPos.X - size / 2, mapPos.Y - size / 2, size, size), color);
+                        Graphics.DrawBox(new RectangleF(mapPos.X - size / 2, mapPos.Y - size / 2, size, size), color, 1f);
                     }
                 }
             }

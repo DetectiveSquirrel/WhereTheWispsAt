@@ -22,5 +22,7 @@ namespace WhereTheWispsAt
         public RangeNode<int> FuelRefillSize { get; set; } = new RangeNode<int>(20, 1, 100);
         public ColorNode Altars { get; set; } = new ColorNode(Color.Red);
         public RangeNode<int> AltarSize { get; set; } = new RangeNode<int>(20, 1, 100);
+        public ColorNode DustConverters { get; set; } = new ColorNode(Color.HotPink);
+        public RangeNode<int> DustConverterSize { get; set; } = new RangeNode<int>(20, 1, 100);
     }
 }
