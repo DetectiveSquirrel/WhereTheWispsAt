@@ -116,6 +116,8 @@ public class WhereTheWispsAt : BaseSettingsPlugin<WhereTheWispsAtSettings>
                 break;
 
             case "Metadata/MiscellaneousObjects/Azmeri/AzmeriBuffEffigySmall":
+            case "Metadata/MiscellaneousObjects/Azmeri/AzmeriBuffEffigyMedium":
+            case "Metadata/MiscellaneousObjects/Azmeri/AzmeriBuffEffigyLarge":
                 Wisps.Encounters[entity] = "Buff";
                 break;
 
@@ -136,7 +138,6 @@ public class WhereTheWispsAt : BaseSettingsPlugin<WhereTheWispsAtSettings>
             case "Metadata/NPC/League/Affliction/GlyphsMajiProclamation02":
             case "Metadata/NPC/League/Affliction/GlyphsSingleStatue":
             case "Metadata/NPC/League/Affliction/GlyphsWarringSisters":
-            case "Metadata/MiscellaneousObjects/Azmeri/AzmeriBuffEffigyMedium":
                 Wisps.Encounters[entity] = metadata[(metadata.LastIndexOf('/') + 1)..];
                 break;
 
