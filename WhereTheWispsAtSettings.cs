@@ -8,6 +8,10 @@ public class WhereTheWispsAtSettings : ISettings
 {
     public ToggleNode Enable { get; set; } = new ToggleNode(false);
     public ToggleNode DrawMap { get; set; } = new ToggleNode(true);
+    public ToggleNode DrawWispsOnGround { get; set; } = new ToggleNode(false);
+    public RangeNode<int> WispsOnGroundAlpha{ get; set; } = new RangeNode<int>(100, 0, 255);
+    public RangeNode<int> WispsOnGroundHeight { get; set; } = new RangeNode<int>(1, 1, 200);
+    public RangeNode<int> WispsOnGroundWidth { get; set; } = new RangeNode<int>(30, 1, 200);
     public ColorNode YellowWisp { get; set; } = new ColorNode(Color.Yellow);
     public RangeNode<int> YellowSize { get; set; } = new RangeNode<int>(5, 1, 100);
     public ColorNode BlueWisp { get; set; } = new ColorNode(Color.SkyBlue);

@@ -1,10 +1,14 @@
 ﻿using ExileCore;
+using ExileCore.PoEMemory;
 using ExileCore.PoEMemory.Components;
 using ExileCore.PoEMemory.MemoryObjects;
+using ExileCore.Shared.Helpers;
 using SharpDX;
 using System.Collections.Generic;
 using System.Linq;
-using ExileCore.Shared.Helpers;
+using System.Runtime.Intrinsics;
+using Vector3N = System.Numerics.Vector3;
+using Vector2N = System.Numerics.Vector2;
 
 namespace WhereTheWispsAt;
 
@@ -55,7 +59,7 @@ public class WhereTheWispsAt : BaseSettingsPlugin<WhereTheWispsAtSettings>
 
         dustConvertersToRemove.ForEach(altar => RemoveEntityFromList(altar, Wisps.DustConverters));
 
-        foreach (var chest in Wisps.Chests.Where(x=>x.GetComponent<Chest>()?.IsOpened != false).ToList())
+        foreach (var chest in Wisps.Chests.Where(x => x.GetComponent<Chest>()?.IsOpened != false).ToList())
         {
             RemoveEntityFromList(chest, Wisps.Chests);
         }
@@ -202,9 +206,14 @@ public class WhereTheWispsAt : BaseSettingsPlugin<WhereTheWispsAtSettings>
 
         void DrawWisps(List<Entity> entityList, Color color, int size, string text)
         {
-            if (Settings.DrawMap && GameController.IngameState.IngameUi.Map.LargeMap.IsVisibleLocal)
+            // Just run this once, land looks flat.
+            float groundZ = entityList.FirstOrDefault()?.GridPosNum is Vector2N gridPosNum
+                            ? GameController.IngameState.Data.GetTerrainHeightAt(gridPosNum)
+                            : 0;
+
+            foreach (var entity in entityList)
             {
-                foreach (var entity in entityList)
+                if (Settings.DrawMap && GameController.IngameState.IngameUi.Map.LargeMap.IsVisibleLocal)
                 {
                     var mapPos = GameController.IngameState.Data.GetGridMapScreenPosition(entity.PosNum.WorldToGrid());
 
@@ -224,7 +233,29 @@ public class WhereTheWispsAt : BaseSettingsPlugin<WhereTheWispsAtSettings>
                         Graphics.DrawBox(new RectangleF(mapPos.X - size / 2, mapPos.Y - size / 2, size, size), color, 1f);
                     }
                 }
+
+                if (Settings.DrawWispsOnGround)
+                {
+                    var entityPos = entity.PosNum;
+                    RectangleF screensize = GameController.Window.GetWindowRectangleReal();
+                    Vector2N entityPosScreen = RemoteMemoryObject.pTheGame.IngameState.Camera.WorldToScreen(entityPos);
+                    if (IsEntityWithinScreen(entityPosScreen, screensize, 50))
+                    {
+                        Graphics.DrawBoundingBoxInWorld(entityPos with { Z = groundZ }, color with { A = (byte)Settings.WispsOnGroundAlpha }, new Vector3N(Settings.WispsOnGroundWidth, Settings.WispsOnGroundWidth, Settings.WispsOnGroundHeight), 0f);
+                    }
+                }
             }
         }
+    }
+    private bool IsEntityWithinScreen(Vector2N entityPos, RectangleF screensize, float allowancePX)
+    {
+        // Check if the entity position is within the screen bounds with allowance
+        float leftBound = screensize.Left - allowancePX;
+        float rightBound = screensize.Right + allowancePX;
+        float topBound = screensize.Top - allowancePX;
+        float bottomBound = screensize.Bottom + allowancePX;
+
+        return entityPos.X >= leftBound && entityPos.X <= rightBound &&
+               entityPos.Y >= topBound && entityPos.Y <= bottomBound;
     }
 }
