@@ -35,6 +35,21 @@ public class WhereTheWispsAt : BaseSettingsPlugin<WhereTheWispsAtSettings>
     {
         Name = "Where The Wisps At";
     }
+    public enum WispType
+    {
+        None,
+        Yellow,
+        Purple,
+        Blue,
+        Chests,
+        LightBomb,
+        Wells,
+        FuelRefill,
+        Altars,
+        DustConverters,
+        Dealer,
+        Encounter
+    }
 
     public override Job Tick()
     {
@@ -173,26 +188,26 @@ public class WhereTheWispsAt : BaseSettingsPlugin<WhereTheWispsAtSettings>
             return;
         }
 
-        foreach (var (list, color, size, text) in new[]
-                 {
-                     (Wisps.Yellow, Settings.YellowWisp, Settings.YellowSize.Value, null),
-                     (Wisps.Purple, Settings.PurpleWisp, Settings.PurpleSize.Value, null),
-                     (Wisps.Blue, Settings.BlueWisp, Settings.BlueSize.Value, null),
-                     (Wisps.Chests, Settings.ChestColor, Settings.ChestSize.Value, null),
-                     (Wisps.LightBomb, Settings.LightBomb, 0, "Light Bomb"),
-                     (Wisps.Wells, Settings.Wells, 0, "Well"),
-                     (Wisps.FuelRefill, Settings.FuelRefill, 0, "Fuel Refill"),
-                     (Wisps.Altars, Settings.Altars, 0, "Altar"),
-                     (Wisps.DustConverters, Settings.DustConverters, 0, "Dust Converter"),
-                     (Wisps.Dealer, Settings.Dealer, 0, "! TRADER !")
-                 })
+        foreach (var (list, color, size, text, type) in new[]
         {
-            DrawWisps(list, color, size, text);
+            (Wisps.Yellow, Settings.YellowWisp, Settings.YellowSize.Value, null, WispType.Yellow),
+            (Wisps.Purple, Settings.PurpleWisp, Settings.PurpleSize.Value, null, WispType.Purple),
+            (Wisps.Blue, Settings.BlueWisp, Settings.BlueSize.Value, null, WispType.Blue),
+            (Wisps.Chests, Settings.ChestColor, Settings.ChestSize.Value, null, WispType.Chests),
+            (Wisps.LightBomb, Settings.LightBomb, 0, "Light Bomb", WispType.LightBomb),
+            (Wisps.Wells, Settings.Wells, 0, "Well", WispType.Wells),
+            (Wisps.FuelRefill, Settings.FuelRefill, 0, "Fuel Refill", WispType.FuelRefill),
+            (Wisps.Altars, Settings.Altars, 0, "Altar", WispType.Altars),
+            (Wisps.DustConverters, Settings.DustConverters, 0, "Dust Converter", WispType.DustConverters),
+            (Wisps.Dealer, Settings.Dealer, 0, "! TRADER !", WispType.Dealer)
+        })
+        {
+            DrawWisps(list, color, size, text, type);
         }
 
         foreach (var (entity, text) in Wisps.Encounters)
         {
-            DrawWisps([entity], Settings.EncounterColor, 0, text);
+            DrawWisps([entity], Settings.EncounterColor, 0, text, WispType.Encounter);
         }
 
         foreach (var chest in Wisps.Chests)
@@ -200,11 +215,11 @@ public class WhereTheWispsAt : BaseSettingsPlugin<WhereTheWispsAtSettings>
             if (chest.DistancePlayer < Settings.ChestScreenDisplayMaxDistance &&
                 chest.TryGetComponent<Render>(out var render))
             {
-                Graphics.DrawBoundingBoxInWorld(chest.PosNum, Settings.ChestColor.Value with { A = 127 }, render.BoundsNum, render.RotationNum.X);
+                Graphics.DrawBoundingBoxInWorld(chest.PosNum, Settings.ChestColor.Value with { A = (byte)Settings.ChestAlpha }, render.BoundsNum, render.RotationNum.X);
             }
         }
 
-        void DrawWisps(List<Entity> entityList, Color color, int size, string text)
+        void DrawWisps(List<Entity> entityList, Color color, int size, string text, WispType type = WispType.None)
         {
             // Just run this once, land looks flat.
             float groundZ = entityList.FirstOrDefault()?.GridPosNum is Vector2N gridPosNum
@@ -234,7 +249,9 @@ public class WhereTheWispsAt : BaseSettingsPlugin<WhereTheWispsAtSettings>
                     }
                 }
 
-                if (Settings.DrawWispsOnGround)
+                var specificWispTypes = new[] { WispType.Yellow, WispType.Purple, WispType.Blue, WispType.LightBomb, WispType.FuelRefill};
+
+                if (Settings.DrawWispsOnGround && specificWispTypes.Contains(type))
                 {
                     var entityPos = entity.PosNum;
                     RectangleF screensize = GameController.Window.GetWindowRectangleReal();
@@ -247,7 +264,7 @@ public class WhereTheWispsAt : BaseSettingsPlugin<WhereTheWispsAtSettings>
             }
         }
     }
-    private bool IsEntityWithinScreen(Vector2N entityPos, RectangleF screensize, float allowancePX)
+    private static bool IsEntityWithinScreen(Vector2N entityPos, RectangleF screensize, float allowancePX)
     {
         // Check if the entity position is within the screen bounds with allowance
         float leftBound = screensize.Left - allowancePX;
