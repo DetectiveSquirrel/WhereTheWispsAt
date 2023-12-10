@@ -21,6 +21,7 @@ public class WhereTheWispsAtSettings : ISettings
     public ColorNode ChestColor { get; set; } = new ColorNode(Color.White);
     public RangeNode<int> ChestSize { get; set; } = new RangeNode<int>(5, 1, 100);
     public RangeNode<int> ChestScreenDisplayMaxDistance { get; set; } = new RangeNode<int>(100, 1, 200);
+    public RangeNode<int> ChestAlpha { get; set; } = new RangeNode<int>(127, 0, 255);
     public ColorNode EncounterColor { get; set; } = new ColorNode(Color.White);
     public ColorNode LightBomb { get; set; } = new ColorNode(Color.White);
     public ColorNode Wells { get; set; } = new ColorNode(Color.Orange);
