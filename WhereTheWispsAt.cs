@@ -6,7 +6,6 @@ using ExileCore.Shared.Helpers;
 using SharpDX;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Intrinsics;
 using Vector3N = System.Numerics.Vector3;
 using Vector2N = System.Numerics.Vector2;
 
@@ -139,6 +138,10 @@ public class WhereTheWispsAt : BaseSettingsPlugin<WhereTheWispsAtSettings>
             case "Metadata/NPC/League/Affliction/GlyphsSingleStatue":
             case "Metadata/NPC/League/Affliction/GlyphsWarringSisters":
                 Wisps.Encounters[entity] = metadata[(metadata.LastIndexOf('/') + 1)..];
+                break;
+
+            case "Metadata/Chests/LeagueAzmeri/OmenChest":
+                Wisps.Encounters[entity] = "Omen Chest";
                 break;
 
             case not null when metadata.Contains("Azmeri/SacrificeAltarObjects"):
