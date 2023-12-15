@@ -259,7 +259,15 @@ public class WhereTheWispsAt : BaseSettingsPlugin<WhereTheWispsAtSettings>
                 if (Settings.DrawWispsOnGround && specificWispTypes.Contains(type))
                 {
                     var entityPos = entity.PosNum;
-                    RectangleF screensize = GameController.Window.GetWindowRectangleReal();
+
+                    RectangleF screensize = new RectangleF()
+                    {
+                        X = 0,
+                        Y = 0,
+                        Width = GameController.Window.GetWindowRectangleTimeCache.Size.Width,
+                        Height = GameController.Window.GetWindowRectangleTimeCache.Size.Height
+                    };
+
                     Vector2N entityPosScreen = RemoteMemoryObject.pTheGame.IngameState.Camera.WorldToScreen(entityPos);
                     if (IsEntityWithinScreen(entityPosScreen, screensize, 50))
                     {
