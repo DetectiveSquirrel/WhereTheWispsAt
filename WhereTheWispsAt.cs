@@ -88,7 +88,7 @@ public class WhereTheWispsAt : BaseSettingsPlugin<WhereTheWispsAtSettings>
         var metadata = entity.Metadata;
         switch (metadata)
         {
-            case "Metadata/MiscellaneousObjects/Azmeri/AzmeriResource":
+            case "Metadata/MiscellaneousObjects/Azmeri/AzmeriResourceBase":
                 if (path != null)
                 {
                     if (path.Contains("League_Azmeri/resources/wisp_doodads/wisp_primal")) Wisps.Blue.Add(entity);
