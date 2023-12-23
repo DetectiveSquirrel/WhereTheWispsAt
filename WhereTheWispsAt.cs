@@ -88,12 +88,12 @@ public class WhereTheWispsAt : BaseSettingsPlugin<WhereTheWispsAtSettings>
         var metadata = entity.Metadata;
         switch (metadata)
         {
-            case "Metadata/MiscellaneousObjects/Azmeri/AzmeriResourceBase":
+            case string when metadata.StartsWith("Metadata/MiscellaneousObjects/Azmeri/AzmeriResource"):
                 if (path != null)
                 {
-                    if (path.Contains("League_Azmeri/resources/wisp_doodads/wisp_primal")) Wisps.Blue.Add(entity);
-                    else if (path.Contains("League_Azmeri/resources/wisp_doodads/wisp_warden")) Wisps.Yellow.Add(entity);
-                    else if (path.Contains("League_Azmeri/resources/wisp_doodads/wisp_vodoo")) Wisps.Purple.Add(entity);
+                    if (path.Contains("_primal")) Wisps.Blue.Add(entity);
+                    else if (path.Contains("_warden")) Wisps.Yellow.Add(entity);
+                    else if (path.Contains("_vodoo")) Wisps.Purple.Add(entity);
                 }
 
                 break;
