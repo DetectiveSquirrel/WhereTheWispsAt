@@ -8,6 +8,8 @@ public class WhereTheWispsAtSettings : ISettings
 {
     public ToggleNode Enable { get; set; } = new ToggleNode(false);
     public ToggleNode DrawMap { get; set; } = new ToggleNode(true);
+    public ToggleNode DrawMapLines { get; set; } = new ToggleNode(true);
+    public RangeNode<int> MapLineSize { get; set; } = new RangeNode<int>(2, 1, 100);
     public ToggleNode DrawWispsOnGround { get; set; } = new ToggleNode(false);
     public RangeNode<int> WispsOnGroundAlpha{ get; set; } = new RangeNode<int>(100, 0, 255);
     public RangeNode<int> WispsOnGroundHeight { get; set; } = new RangeNode<int>(1, 1, 200);
