@@ -241,6 +241,14 @@ public class WhereTheWispsAt : BaseSettingsPlugin<WhereTheWispsAtSettings>
 
             entityList = entityList.OrderBy(x => x.Id).ToList();
 
+            var screenSize = new RectangleF
+            {
+                X = 0,
+                Y = 0,
+                Width = GameController.Window.GetWindowRectangleTimeCache.Size.Width,
+                Height = GameController.Window.GetWindowRectangleTimeCache.Size.Height
+            };
+
             for (var i = 0; i < entityList.Count; i++)
             {
                 var specificWispTypes = new[]
@@ -267,19 +275,23 @@ public class WhereTheWispsAt : BaseSettingsPlugin<WhereTheWispsAtSettings>
                     }
                     else
                     {
-                        if (Settings.DrawMapLines && i < entityList.Count - 1 && type != WispType.Chests &&
-                            i < entityList.Count - 1 && specificWispTypes.Contains(type))
+                        if (Settings.DrawMapLines && i < entityList.Count - 1 && type != WispType.Chests)
                         {
-                            var entityNext = entityList[i + 1];
-
-                            if (entityNext.Id == entityCur.Id + 1 && entityCur.Distance(entityNext) < 30)
+                            if (i < entityList.Count - 1 && specificWispTypes.Contains(type))
                             {
+                                var entityNext = entityList[i + 1];
+
                                 var mapPosTo
                                     = GameController.IngameState.Data.GetGridMapScreenPosition(
                                         entityNext.PosNum.WorldToGrid()
                                     );
 
-                                Graphics.DrawLine(mapPos, mapPosTo, Settings.MapLineSize, color);
+                                if (entityNext.Id == entityCur.Id + 1 && entityCur.Distance(entityNext) < 30 &&
+                                    IsEntityWithinScreen(mapPos, screenSize, 0) &&
+                                    IsEntityWithinScreen(mapPosTo, screenSize, 0))
+                                {
+                                    Graphics.DrawLine(mapPos, mapPosTo, Settings.MapLineSize, color);
+                                }
                             }
                         }
 
@@ -297,15 +309,6 @@ public class WhereTheWispsAt : BaseSettingsPlugin<WhereTheWispsAtSettings>
                 }
 
                 var entityPos = entityCur.PosNum;
-
-                var screenSize = new RectangleF
-                {
-                    X = 0,
-                    Y = 0,
-                    Width = GameController.Window.GetWindowRectangleTimeCache.Size.Width,
-                    Height = GameController.Window.GetWindowRectangleTimeCache.Size.Height
-                };
-
                 var entityPosScreen = RemoteMemoryObject.pTheGame.IngameState.Camera.WorldToScreen(entityPos);
 
                 if (IsEntityWithinScreen(entityPosScreen, screenSize, 50))
