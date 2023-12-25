@@ -74,8 +74,7 @@ public class WhereTheWispsAt : BaseSettingsPlugin<WhereTheWispsAtSettings>
 
     public override void EntityAdded(Entity entity)
     {
-        var path = entity.TryGetComponent<Animated>(out var animatedComp)
-            ? animatedComp?.BaseAnimatedObjectEntity?.Path
+        var path = entity.TryGetComponent<Animated>(out var animatedComp) ? animatedComp?.BaseAnimatedObjectEntity?.Path
             : null;
 
         var metadata = entity.Metadata;
@@ -236,8 +235,7 @@ public class WhereTheWispsAt : BaseSettingsPlugin<WhereTheWispsAtSettings>
         {
             // Just run this once, land looks flat.
             var groundZ = entityList.FirstOrDefault()?.GridPosNum is { } gridPosNum
-                ? GameController.IngameState.Data.GetTerrainHeightAt(gridPosNum)
-                : 0;
+                ? GameController.IngameState.Data.GetTerrainHeightAt(gridPosNum) : 0;
 
             entityList = entityList.OrderBy(x => x.Id).ToList();
 
