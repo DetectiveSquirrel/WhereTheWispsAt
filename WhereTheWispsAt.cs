@@ -229,15 +229,19 @@ public class WhereTheWispsAt : BaseSettingsPlugin<WhereTheWispsAtSettings>
                     render.RotationNum.X
                 );
             }
-        if (Settings.DrawRemainingFuel) {
-            if (!GameController.IngameState.Data.IsInsideAzmeriZone){
+        if (Settings.DrawRemainingFuel)
+        {
+            if (!GameController.IngameState.Data.IsInsideAzmeriZone)
+            {
                 return;
             }
             var fuelLeft = inGameUi.LeagueMechanicButtons.AzmeriElement.Data.RemainingFuelFraction;
             var fuelLeftText = $"{fuelLeft:P0}";
-            var rect = inGameUi.LeagueMechanicButtons.AzmeriElement.GetClientRect();
-            var textPlacement = new Vector2N(rect.Left + 15, rect.Top - 15);
-            Graphics.DrawText(fuelLeftText, textPlacement);
+            var textPlacement = new Vector2(Settings.PositionX, Settings.PositionY);
+            using (Graphics.SetTextScale(Settings.TextSize))
+            {
+                Graphics.DrawText(fuelLeftText, textPlacement, Settings.FuelColor);
+            }
         }
         return;
 
