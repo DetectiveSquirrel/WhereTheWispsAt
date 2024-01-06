@@ -7,6 +7,7 @@ namespace WhereTheWispsAt;
 public class WhereTheWispsAtSettings : ISettings
 {
     public ToggleNode Enable { get; set; } = new ToggleNode(false);
+    public ToggleNode DrawRemainingFuel { get; set; } = new ToggleNode(false);
     public ToggleNode DrawMap { get; set; } = new ToggleNode(true);
     public ToggleNode DrawMapLines { get; set; } = new ToggleNode(true);
     public RangeNode<int> MapLineSize { get; set; } = new RangeNode<int>(2, 1, 100);
